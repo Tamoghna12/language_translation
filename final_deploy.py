@@ -16,8 +16,6 @@ DetectorFactory.seed = 0
 st.set_page_config(page_title="Bulk OCR & Translation App", layout="wide")
 
 # Custom CSS for light/dark mode toggle
-
-
 def apply_custom_css(dark_mode=False):
     if dark_mode:
         st.markdown("""
@@ -54,16 +52,12 @@ def apply_custom_css(dark_mode=False):
         """, unsafe_allow_html=True)
 
 # Function to set GPU memory strategy
-
-
 def set_gpu_memory_strategy():
     os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
     if torch.cuda.is_available():
         torch.cuda.set_per_process_memory_fraction(0.7)
 
 # Function to process each page
-
-
 def process_page(page, reader):
     try:
         img_array = np.array(page.convert('RGB'))
@@ -74,13 +68,12 @@ def process_page(page, reader):
         st.error(f"Error processing page: {str(e)}")
         return None
 
-
+# Translate function using Google Cloud API
 def translate_text(text, target_language, api_key):
-    client = translate.Client(
-        target_language=target_language, credentials=None)
+    # Initialize the client with the API key
+    client = translate.Client(api_key=api_key)
     translated_text = client.translate(text, target_language)
     return translated_text['translatedText']
-
 
 def main():
     # Dark mode toggle
@@ -91,8 +84,7 @@ def main():
 
     # API Key input
     st.sidebar.subheader("Google Cloud API Key")
-    api_key = st.sidebar.text_input(
-        "Enter your Google Cloud API Key", type="password")
+    api_key = st.sidebar.text_input("Enter your Google Cloud API Key", type="password")
 
     # Instructions for creating the API key
     st.sidebar.subheader("Instructions for API Key Creation")
@@ -105,8 +97,7 @@ def main():
     """)
 
     if not api_key:
-        st.warning(
-            "Please enter your Google Cloud API key to enable translation.")
+        st.warning("Please enter your Google Cloud API key to enable translation.")
         return
 
     # File uploader
@@ -133,8 +124,7 @@ def main():
         "Urdu": "ur"
     }
 
-    target_language = st.selectbox(
-        "Select Target Language", list(translation_options.keys()))
+    target_language = st.selectbox("Select Target Language", list(translation_options.keys()))
 
     if uploaded_file is not None:
         # Save the uploaded file to a temporary file
@@ -160,20 +150,18 @@ def main():
                 st.write(f"Detected Language: {detected_language}")
 
                 # Translate text using Google Cloud API
-                translated_text = translate_text(
-                    extracted_text, translation_options[target_language], api_key)
+                translated_text = translate_text(extracted_text, translation_options[target_language], api_key)
 
                 all_extracted_text.append(extracted_text)
                 all_translated_text.append(translated_text)
 
         # Combine all translated text into a single output
         combined_output = "\n\n".join(f"Original Text:\n{extracted_text}\n\nTranslated Text:\n{translated_text}"
-                                      for extracted_text, translated_text in zip(all_extracted_text, all_translated_text))
+                                       for extracted_text, translated_text in zip(all_extracted_text, all_translated_text))
 
         # Display the output text
         st.markdown("### Translated Output")
-        st.markdown(
-            f'<div class="output-box">{combined_output}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="output-box">{combined_output}</div>', unsafe_allow_html=True)
 
         # Download button for the output file
         if combined_output:
@@ -194,7 +182,6 @@ def main():
         gc.collect()
         if use_gpu:
             torch.cuda.empty_cache()
-
 
 if __name__ == "__main__":
     main()
