@@ -7,3 +7,4 @@ google-cloud-translate==2.0.1
 langdetect==1.0.9
 Pillow==9.4.0
 setuptools==65.5.0  # Include this for distutils
+reportlab
